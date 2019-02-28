@@ -58,6 +58,12 @@ class Automaton:
 
         self.matrix[origin, destiny] = self.__NULL
 
+    def delete_state(self, state):
+        #eliminate all the input and output of the state
+        for i in range(self.number_of_states):
+            self.delete_move(state,i)
+            self.delete_move(i,state)
+
     def add_initial_state(self, initial_states):
         # TODO check if its inside the states
         # TODO check if its already one
@@ -85,12 +91,16 @@ class Automaton:
 
         return [idx for idx in range(self.number_of_states) if len(self.matrix[idx][state]) != 0]
 
-    def state_accesible(self,state):
-        """
-        Check if a state is accesible this means that it can be reach from the initial state
-        """
-        # TODO
-        return None
+    def states_accesibles(self):
+        
+        
+        vector =[]      # Set Si-1
+        vector2 =[0]    # Set Si,the state 0 is always the initial state
+        while(vector != vector2):   #stop when we can´t add more accessible states
+            vector = vector2
+            for AS in vector2:
+                vector2=list(set(vector2+(self.moves_of_the_state(AS))))      #A union of all the accessible sates with its next move
+        return vector2
     
     def state_coaccesible(self,state):
         """
@@ -99,17 +109,13 @@ class Automaton:
         # TODO
         return None
 
-    def reduce_automaton(self):
-        """
-        Reduce the Automaton
-        """
-        # TODO
-        pass
-
-    def is_empty(self):
-        """
-        Check if the language accepted by the automaton is empty
-        """
+    def is_empty(self):#not completed
+        empty=False
+        for i in self.states_accesibles():
+            if self.final_states.__contains__(i):       #Have to find the way to compare i such a integer with final_states
+                empty = True
+                break
+        return empty
         # TODO
         return None
 
@@ -126,10 +132,3 @@ class Automaton:
 
         return pickle.load(open(path, "rb"))
     ######################################################
-
-
-A2 = Automaton.load_automaton("A2.p")
-print("Desde 1 puedes llegar a : ", A2.moves_of_the_state(7))
-print("A 1 puedes llegar desde : ", A2.moves_to_the_state(7))
-
-print(A2.display_matrix())
