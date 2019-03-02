@@ -24,7 +24,8 @@ class Automaton:
         if len(names) == len(self.states):
             self.states = np.array([y for y in names])
         else:
-            raise ValueError(f"Error : {names} is not of the same size as the actuals states.")
+            raise ValueError(
+                f"Error : {names} is not of the same size as the actuals states.")
 
     @staticmethod
     def random_moves_automaton(number_of_states, alphabet):
@@ -42,6 +43,7 @@ class Automaton:
             index=self.states,
             columns=self.states)
     # Check symbol name
+
     def is_on_alphabet(self, symbol):
 
         return symbol in self.alphabet
@@ -52,17 +54,18 @@ class Automaton:
             self.matrix[origin][destiny].append(transition)
             #self.matrix[origin,destiny] = transition
         else:
-            raise ValueError(f"Error : {transition} movement is not on the alphabet.")
+            raise ValueError(
+                f"Error : {transition} movement is not on the alphabet.")
 
     def delete_move(self, origin, destiny):
 
         self.matrix[origin, destiny] = self.__NULL
 
     def delete_state(self, state):
-        #eliminate all the input and output of the state
+        # eliminate all the input and output of the state
         for i in range(self.number_of_states):
-            self.delete_move(state,i)
-            self.delete_move(i,state)
+            self.delete_move(state, i)
+            self.delete_move(i, state)
 
     def add_initial_state(self, initial_states):
         # TODO check if its inside the states
@@ -83,6 +86,7 @@ class Automaton:
         self.final_states.remove(final_states)
     ######################################################
     # AUTOMATON INFO ###########################º
+
     def moves_of_the_state(self, state):
 
         return [idx for idx, x in enumerate(self.matrix[state]) if x]
@@ -92,32 +96,29 @@ class Automaton:
         return [idx for idx in range(self.number_of_states) if len(self.matrix[idx][state]) != 0]
 
     def states_accesibles(self):
-        
-        
-        vector =[]      # Set Si-1
-        vector2 =[0]    # Set Si,the state 0 is always the initial state
-        while(vector != vector2):   #stop when we can´t add more accessible states
+
+        vector = []      # Set Si-1
+        vector2 = [0]    # Set Si,the state 0 is always the initial state
+        while(vector != vector2):  # stop when we can´t add more accessible states
             vector = vector2
             for AS in vector2:
-                vector2=list(set(vector2+(self.moves_of_the_state(AS))))      #A union of all the accessible sates with its next move
+                # A union of all the accessible sates with its next move
+                vector2 = list(set(vector2+(self.moves_of_the_state(AS))))
         return vector2
-    
-    def state_coaccesible(self,state):
+
+    def state_coaccesible(self, state):
         """
         Check if a state is coaccesible this means that a final state can be reach from this state
         """
         # TODO
         return None
 
-    def is_empty(self):#not completed
-        empty=False
-        for i in self.states_accesibles():
-            if self.final_states.__contains__(i):       #Have to find the way to compare i such a integer with final_states
-                empty = True
-                break
-        return empty
-        # TODO
-        return None
+    def is_empty(self):  
+
+        for state in self.states_accesibles():
+            if self.states[state] in self.final_states:
+                return True
+        return False
 
     def is_infinite(self):
         """
@@ -127,8 +128,17 @@ class Automaton:
         return None
     ######################################################
     ################ AUTOMATON LOAD ##########################
+
     @staticmethod
     def load_automaton(path):
 
         return pickle.load(open(path, "rb"))
     ######################################################
+
+
+A2 = Automaton.load_automaton("A2.p")
+A = Automaton.load_automaton("A.p")
+
+print(A.is_empty())
+print("_______")
+print(A2.is_empty())
