@@ -37,12 +37,21 @@ class Automaton:
 
     def display_matrix(self):
         parapandas = np.array(self.matrix)
-
-        return pd.DataFrame(
-            data=parapandas,
-            index=self.states,
-            columns=self.states)
+        try:
+            return pd.DataFrame(
+                data=parapandas,
+                index=self.states,
+                columns=self.states)
+        except:
+            return "The matrix is empty"
     # Check symbol name
+
+    def state_index(self, state):
+        """
+        Gives the index of a state example q0 -> 0
+        """
+        index, = np.where(self.states == state)
+        return index[0]
 
     def is_on_alphabet(self, symbol):
 
@@ -52,14 +61,14 @@ class Automaton:
     def add_move(self, origin, destiny, transition):
         if self.is_on_alphabet(transition):
             self.matrix[origin][destiny].append(transition)
-            #self.matrix[origin,destiny] = transition
+            # self.matrix[origin,destiny] = transition
         else:
             raise ValueError(
                 f"Error : {transition} movement is not on the alphabet.")
 
     def delete_move(self, origin, destiny):
 
-        self.matrix[origin, destiny] = self.__NULL
+        self.matrix[origin][destiny] = []
 
     def delete_state(self, state):
         # eliminate all the input and output of the state
@@ -106,26 +115,77 @@ class Automaton:
                 vector2 = list(set(vector2+(self.moves_of_the_state(AS))))
         return vector2
 
-    def state_coaccesible(self, state):
+    def states_coaccesibles(self):
         """
         Check if a state is coaccesible this means that a final state can be reach from this state
         """
-        # TODO
-        return None
+        vector = []                      # Set Si-1
+        # Set final states of the automaton
+        vector2 = [self.state_index(x) for x in self.final_states]
+        while(vector != vector2):  # stop when we can´t add more accessible states
+            vector = vector2
+            for CS in vector2:
+                # A union of all the accessible sates with its next move
+                vector2 = list(set(vector2+(self.moves_to_the_state(CS))))
+        return vector2
+    
+    def usefull_states(self):
+        accessible_states = set(self.states_accesibles())
+        coaccessible_states = set(self.states_coaccesibles())
 
-    def is_empty(self):  
+        return list((accessible_states & coaccessible_states))
+
+    def useless_states(self):
+        states = set([self.state_index(x) for x in self.states])
+        usefull_states = set(self.usefull_states())
+        
+        return list(states - usefull_states)
+
+
+    def reduced_automaton(self):
+
+        for useless_states in self.useless_states():
+            self.delete_state(useless_states)
+
+    def is_empty(self):
 
         for state in self.states_accesibles():
             if self.states[state] in self.final_states:
-                return True
+                return False
+        return True
+
+    def is_cycle_present_helper(self, v, visited, on_stack):
+        """Return True if the DFS traversal starting at vertex v detects a
+        cycle. Uses set visited to keep track of nodes that have been visited. Uses
+        set on_stack to keep track of nodes that are 'on the stack' of the recursive
+        calls."""
+        if v in on_stack:
+            return True
+        on_stack.add(v)
+        for dest in self.moves_of_the_state(v):
+            if dest not in visited:
+                if self.is_cycle_present_helper( dest, visited, on_stack):
+                    return True
+        on_stack.remove(v)
+        visited.add(v)
+        return False
+
+    def is_cycle_present(self):
+        """Return True if cycle is present in the graph."""
+        on_stack = set()
+        visited = set()
+        for v in [self.state_index(x) for x in self.states]:
+            if v not in visited:
+                if self.is_cycle_present_helper( v, visited, on_stack):
+                    return True
         return False
 
     def is_infinite(self):
         """
         Check if the language accepted by the automaton is infinite
         """
-        # TODO
-        return None
+        self.reduced_automaton()
+        return self.is_cycle_present()
     ######################################################
     ################ AUTOMATON LOAD ##########################
 
@@ -136,9 +196,20 @@ class Automaton:
     ######################################################
 
 
-A2 = Automaton.load_automaton("A2.p")
-A = Automaton.load_automaton("A.p")
+if __name__ == "__main__":
+    A3 = Automaton.load_automaton("A3.p")    
+    A2 = Automaton.load_automaton("A2.p")
+    A = Automaton.load_automaton("A.p")
 
-print(A.is_empty())
-print("_______")
-print(A2.is_empty())
+    #print(A3.display_matrix())
+    #print(A3.is_infinite())
+    print(A3.display_matrix())
+    print(A3.reduced_automaton())
+    print(A3.display_matrix())
+    print(A3.states_coaccesibles())
+    print(A3.states_accesibles())
+
+    print(A3.useless_states())
+    print(A3.usefull_states())
+
+

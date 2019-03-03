@@ -94,6 +94,25 @@ def create_automaton_two():
 
     return A2
 
+def create_automaton_three():
+    A3 = Automaton(5, ['a', 'b'])
+    A3.add_initial_state('q0')
+    A3.add_final_state(['q2'])
+    
+    # q0 transition
+    A3.add_move(0, 1, 'a')
+    A3.add_move(1, 2, 'b')
+
+    A3.add_move(4, 3, 'b')
+    A3.add_move(3, 4, 'b')
+    
+    
+
+    pickle.dump( A3, open( "A3.p", "wb" ) )
+
+    return A3
+
 
 create_automaton_one()
 create_automaton_two()
+create_automaton_three()
