@@ -159,17 +159,18 @@ class Automaton:
         for statei in range(self.number_of_states):            #step 1 , get all the E-closure
             for Eclosure in self.moves_of_the_state(statei):
                 if self.epsilon in self.matrix[statei][Eclosure]:
-                    lista[statei] + [Eclosure] 
+                    lista[statei].append(Eclosure)
                     self.empty_moves_elimination_helper(lista,statei,Eclosure)
         
         matrix_without_empty = [[[] for y in range(self.number_of_states)]      #A matrix to save the results
                                     for x in range(self.number_of_states)]
         
         for state in range(self.number_of_states):
-            for statei in lista[statei]:
+            for statei in lista[state]:
                 for statej in self.moves_of_the_state(statei):
                     for move in self.matrix[statei][statej]:
-                        if move != self.epsilon:matrix_without_empty[statei][statej].append(move)
+                        if move != self.epsilon:
+                            matrix_without_empty[state][statej].append(move)
 
 
         self.matrix=matrix_without_empty
@@ -246,7 +247,6 @@ if __name__ == "__main__":
     A6 = Automaton.load_automaton('A6.p')
 
     print(A6.display_matrix())
-    print(A6.is_empty)
-    print(A.states_accesibles())
-    print(A6.final_states)
-    print(A6.is_empty)
+    print(A6.is_empty())
+    print(A6.is_infinite())
+    print(A6.display_matrix())
