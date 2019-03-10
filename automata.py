@@ -135,13 +135,62 @@ class Automaton:
 
         return list((accessible_states & coaccessible_states))
 
+    def useless_states(self):
+        states = set([self.state_index(x) for x in self.states])
+        usefull_states = set(self.usefull_states())
+        
+        return list(states - usefull_states)
+
+    def empty_moves_elimination_helper(self,lista,statei,Eclosure):
+        for state in self.moves_of_the_state(Eclosure):
+            if self.epsilon in self.matrix[Eclosure][state]:
+                lista[statei] + state
+                self.empty_moves_elimination_helper(lista,statei,state)
+        pass
+
+
+    def empty_moves_elimination(self):
+        """ Given a NFA with empty move, convert to a DFA which accept the same language
+        """
+        lista = []
+        for state in range(self.number_of_states):
+            lista.append([state])
+
+        for statei in range(self.number_of_states):            #step 1 , get all the E-closure
+            for Eclosure in self.moves_of_the_state(statei):
+                if self.epsilon in self.matrix[statei][Eclosure]:
+                    lista[statei].append(Eclosure)
+                    self.empty_moves_elimination_helper(lista,statei,Eclosure)
+        
+        matrix_without_empty = [[[] for y in range(self.number_of_states)]      #A matrix to save the results
+                                    for x in range(self.number_of_states)]
+        
+        for state in range(self.number_of_states):
+            for statei in lista[state]:
+                for statej in self.moves_of_the_state(statei):
+                    for move in self.matrix[statei][statej]:
+                        if move != self.epsilon:
+                            matrix_without_empty[state][statej].append(move)
+
+
+        self.matrix=matrix_without_empty
+
+
+        pass
+    def reduced_automaton(self):
+
+        for useless_states in self.useless_states():
+            self.delete_state(useless_states)
+
+    def is_empty(self):
+        self.empty_moves_elimination()
+        accesible_states= self.states_accesibles()
+        for state in accesible_states:
+            if self.states[state] in self.final_states:
+                return False
         return True
 
     def is_cycle_present_helper(self, v, visited, on_stack):
-        """Return True if the DFS traversal starting at vertex v detects a
-        cycle. Uses set visited to keep track of nodes that have been visited. Uses
-        set on_stack to keep track of nodes that are 'on the stack' of the recursive
-        calls."""
         if v in on_stack:
             return True
         on_stack.add(v)
@@ -167,7 +216,7 @@ class Automaton:
         """
         Check if the language accepted by the automaton is infinite
         """
-
+        self.empty_moves_elimination()
         self.reduced_automaton()
         return self.is_cycle_present()
     ######################################################
@@ -184,4 +233,9 @@ if __name__ == "__main__":
     A3 = Automaton.load_automaton("A3.p")    
     A2 = Automaton.load_automaton("A2.p")
     A = Automaton.load_automaton("A.p")
+    A6 = Automaton.load_automaton('A6.p')
 
+    print(A6.display_matrix())
+    print(A6.is_empty())
+    print(A6.is_infinite())
+    print(A6.display_matrix())
