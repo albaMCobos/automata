@@ -7,7 +7,7 @@ import pickle
 class Automaton:
 
     def __init__(self, number_of_states, alphabet):
-
+        self.epsilon = 'E'
         self.__NULL = 'O'  # Pythonic?
         self.number_of_states = number_of_states
         # TODO change 'O' initialization
@@ -15,7 +15,7 @@ class Automaton:
                        for x in range(number_of_states)]
         self.states = np.array([f"q{y}" for y in range(number_of_states)])
         # maybe name _alphabet? pythonic?
-        self.alphabet = alphabet
+        self.alphabet = alphabet + [self.epsilon]
         self.initial_states = None
         self.final_states = []
     ########## AUTOMATON DEFINITION ############
@@ -135,23 +135,6 @@ class Automaton:
 
         return list((accessible_states & coaccessible_states))
 
-    def useless_states(self):
-        states = set([self.state_index(x) for x in self.states])
-        usefull_states = set(self.usefull_states())
-        
-        return list(states - usefull_states)
-
-
-    def reduced_automaton(self):
-
-        for useless_states in self.useless_states():
-            self.delete_state(useless_states)
-
-    def is_empty(self):
-
-        for state in self.states_accesibles():
-            if self.states[state] in self.final_states:
-                return False
         return True
 
     def is_cycle_present_helper(self, v, visited, on_stack):
@@ -184,6 +167,7 @@ class Automaton:
         """
         Check if the language accepted by the automaton is infinite
         """
+
         self.reduced_automaton()
         return self.is_cycle_present()
     ######################################################
@@ -200,16 +184,4 @@ if __name__ == "__main__":
     A3 = Automaton.load_automaton("A3.p")    
     A2 = Automaton.load_automaton("A2.p")
     A = Automaton.load_automaton("A.p")
-
-    #print(A3.display_matrix())
-    #print(A3.is_infinite())
-    print(A3.display_matrix())
-    print(A3.reduced_automaton())
-    print(A3.display_matrix())
-    print(A3.states_coaccesibles())
-    print(A3.states_accesibles())
-
-    print(A3.useless_states())
-    print(A3.usefull_states())
-
 
